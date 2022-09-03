@@ -1,0 +1,25 @@
+{
+  "name": "tarinyoomdiscordbot",
+  "version": "1.0.0",
+  "description": "Tarinyoom team discord bot lablab ai hackathon project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ac-reynolds/team-tarinyoom-official-discord-bot.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ac-reynolds/team-tarinyoom-official-discord-bot/issues"
+  },
+  "homepage": "https://github.com/ac-reynolds/team-tarinyoom-official-discord-bot#readme",
+  "dependencies": {
+    "discord.js": "^14.3.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.23.0"
+  }
+}
