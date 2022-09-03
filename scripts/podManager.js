@@ -11,9 +11,8 @@ function updateVector(messageId, values, namespace){
         "values" : values,
         "namespace" : namespace
     }
-    return callAPI("vectors/update", jsonObjects);
+    return callAPI("vectors/update", jsonObject);
 }
-
 
 function upsertVectors(jsonObjects){
     return callAPI("vectors/upsert", jsonObjects);
@@ -51,7 +50,5 @@ function callAPI(urlPoint, jsonObject) {
         console.log(response);
     });
 }
-
-
 
 module.exports = { updateVector, upsertVectors, deleteVectors, deleteAllVectors };

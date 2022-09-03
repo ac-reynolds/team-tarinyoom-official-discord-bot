@@ -1,6 +1,6 @@
 const discordBot = require("./scripts/discordBot.js");
 const tests = require("./scripts/tests");
 
-console.log(tests.runTests() ? "All tests passed." : "Not all tests passed.");
+tests.runTests();
 
-discordBot.runDiscordBot();
+//discordBot.runDiscordBot();

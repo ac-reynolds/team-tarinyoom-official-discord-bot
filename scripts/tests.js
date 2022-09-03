@@ -1,5 +1,6 @@
 const cohereClient = require('./cohereClient');
 const podManager = require('./podManager');
+const test_namespace = "test";
 
 async function runCohereTest(){
 
@@ -39,6 +40,10 @@ async function runPodTest(){
 //values - cohere embed array data
 //namespace - discord guildId
 
+
+	//update using cohere
+	const vals = await cohereClient.getEmbedding("this is a test");
+	podManager.updateVector("message 1", vals, test_namespace);
 }
 
 async function runTests() {
