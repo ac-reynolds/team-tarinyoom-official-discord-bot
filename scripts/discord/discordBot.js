@@ -38,10 +38,18 @@ async function handleSleuth(interaction) {
 	});
 
 	if (sleuthingInitiated) {
-		await interaction.reply(`Sleuthing initiated...`);
+		await interaction.reply(`Server-wide sleuthing initiated...`);
 	} else {
 		await interaction.reply(`I'm already sleuthing here, buddy!`); // TODO: could provide some progress metrics perhaps
 	}
+}
+
+async function handleSleuthnt(interaction) {
+	await interaction.reply({content: `Sleuthnt not yet implemented :monkaS:`, ephemeral: true});
+}
+
+async function handleStats(interaction) {
+	await interaction.reply({content: `Sleuth stats: <stats>`, ephemeral: true});
 }
 
 function buildOnReady(secrets) {
@@ -72,6 +80,19 @@ function buildOnInteractionCreate() {
 					console.error(`Error when responding to search command: ${error}`);
 				}
 				break;
+			case 'tsleuthnt':
+				try {
+					await handleSleuthnt(interaction);
+				} catch (error) {
+					console.error(`Error when responding to sleuthn't command: ${error}`);
+				}
+				break;
+			case 'tstats':
+				try {
+					await handleStats(interaction);
+				} catch (error) {
+					console.error(`Error when responding to stats command: ${error}`);
+				}
 		}
 	};
 };

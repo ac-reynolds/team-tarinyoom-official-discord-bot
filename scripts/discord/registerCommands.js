@@ -2,18 +2,20 @@ const { SlashCommandBuilder, Routes } = require('discord.js');
 const { REST } = require('@discordjs/rest');
 
 const commands = [
-	new SlashCommandBuilder().setName('tsleuth').setDescription('Reads in server message data. Takes a while... don\'t disturb me!'),
+	new SlashCommandBuilder().setName('tsleuth').setDescription('Starts sleuthing through the server. This could take a while...'),
 	new SlashCommandBuilder().setName('tsearch').setDescription('Searches for the given string using approximate semantic search.')
 		.addStringOption(option => 
 			option
 			.setName('target')
 			.setDescription('The target to search for!')
-			.setRequired(true))
+			.setRequired(true)),
+	new SlashCommandBuilder().setName('tsleuthnt').setDescription('Pauses sleuthing progress.'),
+	new SlashCommandBuilder().setName('tstats').setDescription('Get sleuthing stats.')
 ].map(command => command.toJSON());
 
 /**
  * Registers the appropriate command according to the passed parameters.
- * @param {{botToken, clientId,}} config 
+ * @param {{botToken, clientId}} config 
  */
 function register(config) {
 	

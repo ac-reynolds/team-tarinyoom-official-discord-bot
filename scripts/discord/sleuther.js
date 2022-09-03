@@ -1,6 +1,23 @@
 const cohere = require('../cohereClient');
 const pinecone = require('../podManager');
 
+/*
+const sleuthingStatus = {
+	guilds: {
+		guildId: {
+			sleuthingActive: true,
+			channels: {
+				channelId: {
+					//sleuthingActive: true,
+					earliestMessage: id,
+					finished: false
+				}
+			}
+
+		}
+}};
+*/
+
 async function sleuthChannel(client, channel) {
 	console.log(`Sleuthing ${channel.name}...`);
 	const channelMessages = await channel.messages.fetch({ // this is causing some errors
@@ -12,7 +29,7 @@ async function sleuthChannel(client, channel) {
 	}
 }
 
-async function initiateSleuthing(client, guildId, callback) {
+async function initiateSleuthing(client, guildId, callbackSuccess) {
 
 	console.log(`Sleuthing ${client.guilds.cache.get(guildId).name}...`);
 
