@@ -1,15 +1,15 @@
 const secrets = require('../config.json');
 
-function getCohereApiKey() {
-	return secrets.cohereApiKey;
+function getCohereSecrets() {
+	return secrets.cohere;
 }
 
-function getDiscordToken() {
-	return secrets.discordBotToken;
+function getDiscordSecrets() {
+	return secrets.discord;
 }
 
-function getPineconeToken() {
-	return secrets.pineconeApiKey;
+function getPineconeSecrets() {
+	return secrets.pinecone;
 }
 
-module.exports = { getCohereApiKey, getDiscordToken, getPineconeToken};
+module.exports = { getCohereSecrets, getDiscordSecrets, getPineconeSecrets};

@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits, MessageCollector } = require('discord.js');
+const { Client, GatewayIntentBits } = require('discord.js');
 const secrets = require('./secretManager')
 let client;
 
@@ -17,7 +17,7 @@ function runDiscordBot(){
 	client.once('ready', onReady);
 	client.on('messageCreate', onMessageCreate); // why isn't this getting triggered ?
 
-	client.login(secrets.getDiscordToken());
+	client.login(secrets.getDiscordSecrets().botToken);
 }
 
 module.exports = { runDiscordBot };
