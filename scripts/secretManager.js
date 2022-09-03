@@ -8,4 +8,8 @@ function getDiscordToken() {
 	return secrets.discordBotToken;
 }
 
-module.exports = { getCohereApiKey, getDiscordToken };
+function getPineconeToken() {
+	return secrets.pineconeApiKey;
+}
+
+module.exports = { getCohereApiKey, getDiscordToken, getPineconeToken};
