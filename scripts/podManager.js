@@ -1,54 +1,50 @@
 var request = require('request');
 const secrets = require('./secretManager')
 
-//jsonObject properties
-//id - discord messageId
-//values - cohere embed array data
-//namespace - discord guildId
-function updateVector(messageId, values, namespace){
+
+async function upsertVectors(jsonObjects){
+    return await callAPI("/vectors/upsert", jsonObjects);
+}
+
+async function search(values, namespace, numResults = 5) {
     var jsonObject = {
-        "id" : messageId,
-        "values" : values,
+        "vector": values,
+        "topK": numResults,
+        "includeMetadata": true,
+        "includeValues": true,
+        "namespace": namespace
+    };
+    return await callAPI("/query", jsonObject);
+}
+
+async function deleteVectors(ids, namespace){
+    var jsonObject = {
+        "ids" : ids,
         "namespace" : namespace
     }
-    return callAPI("vectors/update", jsonObject);
+    return await callAPI("/vectors/delete", jsonObject);
 }
 
-function upsertVectors(jsonObjects){
-    return callAPI("vectors/upsert", jsonObjects);
-}
-
-function deleteVectors(ids, namespace){
-    var jsonObject = {
-        "id" : ids,
-        "deleteAll" : false,
-        "namespace" : namespace
-    }
-    return callAPI("vectors/delete", jsonObject);
-}
-
-function deleteAllVectors(namespace){
-    var jsonObject = {
-        "id" : [],
-        "deleteAll" : true,
-        "namespace" : namespace
-    }
-    return callAPI("vectors/delete", jsonObject);
-}
-
-function callAPI(urlPoint, jsonObject) {
-    return request({
-        url: "https://hackathon-s1-95bcf95.svc.us-west1-gcp.pinecone.io/"+urlPoint,
-        method: "POST",
-        headers: {
-            'Api-Key': secrets.getPineconeToken(),
-            'Content-Type': 'application/json'
-        },
-        json: true,   
-        body: jsonObject
-    }, function (error, response, body){
-        console.log(response);
+async function callAPI(urlEndPoint, jsonObject) {
+    return new Promise(function (resolve, reject) {
+        request({
+            url: secrets.getPineconeUrl() + urlEndPoint,
+            method: "POST",
+            headers: {
+                'Api-Key': secrets.getPineconeApiKey(),
+                'Content-Type': 'application/json'
+            },
+            json: true,   
+            body: jsonObject
+        }, function (error, response, body){
+            if (!error && response.statusCode == 200) {
+                console.log('Resolved ' + urlEndPoint);
+                resolve(response.body.matches);
+              } else {
+                reject(error);
+              }
+        });
     });
 }
 
-module.exports = { updateVector, upsertVectors, deleteVectors, deleteAllVectors };
+module.exports = { upsertVectors, deleteVectors, search };
