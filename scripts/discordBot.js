@@ -1,6 +1,5 @@
-// Require the necessary discord.js classes
 const { Client, GatewayIntentBits } = require('discord.js');
-const { token } = require('../config.json');
+const secrets = require('./secretManager')
 
 function runDiscordBot(){
 	// Create a new client instance
@@ -12,10 +11,7 @@ function runDiscordBot(){
 	});
 
 	// Login to Discord with your client's token
-	client.login(token);
+	client.login(secrets.getDiscordToken());
 }
 
-
 module.exports = { runDiscordBot };
-
-

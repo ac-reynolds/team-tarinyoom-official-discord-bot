@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/ac-reynolds/team-tarinyoom-official-discord-bot#readme",
   "dependencies": {
+    "cohere-ai": "^4.1.3",
     "discord.js": "^14.3.0"
   },
   "devDependencies": {
