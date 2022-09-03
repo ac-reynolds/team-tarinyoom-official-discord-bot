@@ -50,20 +50,29 @@ async function runPodTest(){
 		"vectors": 
 		[{
 			"id": "testmessage1",
-			"values": testVectors[0]
+			"values": testVectors[0],
+			"metadata": {
+				"channelId": "1"
+			}
 		},
 		{
 			"id": "testmessage2",
-			"values": testVectors[1]
+			"values": testVectors[1],
+			"metadata": {
+				"channelId": "2"
+			}
 		},
 		{
 			"id": "testmessage3",
-			"values": testVectors[2]
+			"values": testVectors[2],
+			"metadata": {
+				"channelId": "3"
+			}
 		}],
 		"namespace": test_namespace};	
 	let task = await podManager.upsertVectors(obj);
 	let task2 = await podManager.search(searchVector,test_namespace);
-	console.log(`Search results id-${task2[0].id} score-${task2[0].score}, id-${task2[1].id} score-${task2[1].score}, id-${task2[2].id} score-${task2[2].score}`);
+	console.log(`Search results id-${task2[0].id} score-${task2[0].score} metadata-${task2[0].metadata.channelId}, id-${task2[1].id} score-${task2[1].score}, id-${task2[2].id} score-${task2[2].score}`);
 	let task3 = await podManager.deleteVectors(["testmessage1","testmessage2","testmessage3"],test_namespace);
 }
 
