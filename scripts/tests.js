@@ -14,6 +14,7 @@ async function runCohereTest(){
 			})
 		} catch (error) {
 			console.error(`Error reading evaluating embeddings: ${error}`);
+
 			return false;
 		}
 	
