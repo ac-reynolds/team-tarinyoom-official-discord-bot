@@ -3,7 +3,7 @@ const secrets = require('./secretManager');
 
 async function getEmbedding(input) {
 	const embedding = await getEmbeddings([input]);
-	return embedding;
+	return embedding[0];
 }
 
 async function getEmbeddings(inputs) {

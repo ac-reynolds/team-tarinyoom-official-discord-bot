@@ -1,16 +1,22 @@
-const { Client, GatewayIntentBits } = require('discord.js');
+const { Client, GatewayIntentBits, MessageCollector } = require('discord.js');
 const secrets = require('./secretManager')
+let client;
+
+function onReady() {
+	console.log("ready!");
+}
+
+function onMessageCreate(msg) {
+	console.log(`${msg} created`);
+}
 
 function runDiscordBot(){
 	// Create a new client instance
-	const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+	client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
-	// When the client is ready, run this code (only once)
-	client.once('ready', () => {
-		console.log('Ready!');
-	});
+	client.once('ready', onReady);
+	client.on('messageCreate', onMessageCreate); // why isn't this getting triggered ?
 
-	// Login to Discord with your client's token
 	client.login(secrets.getDiscordToken());
 }
 

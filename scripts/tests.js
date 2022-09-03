@@ -4,17 +4,28 @@ const test_namespace = "test";
 
 async function runCohereTest(){
 
-	function verifyEmbeddingFormat(embeddings) {
-	
+	function verifyEmbeddingFormat(embedding) {
 		try {
-			embeddings.forEach(l => {
-				if (l.length != 4096) {
-					console.error(`Expected embeddings of length 4096, but found an embedding of length ${l.length}.`);
-					return false;
-				}
+			if (embedding.length != 4096) {
+				console.error(`Expected embeddings of length 4096, but found an embedding of length ${embedding.length}.`);
+				return false;
+			}
+		} catch (error) {
+			console.error(`Error reading embeddings: ${error}`);
+
+			return false;
+		}
+
+		return true;
+	}
+
+	function verifyEmbeddingsFormat(embeddings) {
+		try {
+			embeddings.forEach(e => {
+				verifyEmbeddingFormat(e);
 			})
 		} catch (error) {
-			console.error(`Error reading evaluating embeddings: ${error}`);
+			console.error(`Error reading embeddings: ${error}`);
 
 			return false;
 		}
@@ -22,17 +33,14 @@ async function runCohereTest(){
 		return true;
 	}
 
-	const testResponses = await Promise.all([
-		cohereClient.getEmbedding("single test message"),
-		cohereClient.getEmbeddings(["test message 1", "another test message"])
-	]);
-
-	const numSuccesses = testResponses.reduce(
-		(agg, v) => verifyEmbeddingFormat(v) ? agg + 1 : agg, 0);
-	
-	console.log(`Passed ${numSuccesses}/${testResponses.length} test cases.`);
-
-	return numSuccesses == testResponses.length;
+	const soloResponse = await cohereClient.getEmbedding("single test message");
+	if (!verifyEmbeddingFormat(soloResponse)) {
+		console.log("Single embedding test failed.");
+	}
+	const multiResponse = await cohereClient.getEmbeddings(["test message 1", "another test message"]);
+	if (!verifyEmbeddingsFormat(multiResponse)) {
+		console.log("Multi embedding test failed.");
+	}
 }
 
 async function runPodTest(){
@@ -43,7 +51,7 @@ async function runPodTest(){
 
 	//update using cohere
 	const vals = await cohereClient.getEmbedding("this is a test");
-	podManager.updateVector("message 1", vals, test_namespace);
+	//podManager.updateVector("message 1", vals, test_namespace);
 }
 
 async function runTests() {
