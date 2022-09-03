@@ -2,11 +2,24 @@ const { Client, GatewayIntentBits } = require('discord.js');
 const secretManager = require('../secretManager');
 const registerCommands = require('./registerCommands');
 const sleuther = require('./sleuther');
+const searcher = require('./searcher');
 let client;
 
 async function handleSearch(interaction) {
+
 	const target = interaction.options.getString('target');
-	await interaction.reply(`Searching for target: "${target}"...`);
+	const results = await searcher.search(target, interaction.guildId, 1);
+
+	const channels = client.guilds.cache.get(interaction.guildId).channels.cache;
+
+	const messages = results.map(
+		async result => await channels.get(result.channelId).messages.fetch(result.messageId));
+
+	const fetched = await Promise.all(messages);
+	for (m of fetched) {
+		console.log(await m);
+	}
+	await interaction.reply(`Found answers for ${target}: "${fetched}"...`);
 }
 
 async function handleSleuth(interaction) {
@@ -15,9 +28,9 @@ async function handleSleuth(interaction) {
 	});
 
 	if (sleuthingInitiated) {
-		await interaction.reply(`Sleuthing...`);
+		await interaction.reply(`Sleuthing initiated...`);
 	} else {
-		await interaction.reply(`I'm already sleuthing here, buddy!`);
+		await interaction.reply(`I'm already sleuthing here, buddy!`); // TODO: could provide some progress metrics perhaps
 	}
 }
 
