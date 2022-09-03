@@ -28,10 +28,10 @@ async function deleteVectors(ids, namespace){
 async function callAPI(urlEndPoint, jsonObject) {
     return new Promise(function (resolve, reject) {
         request({
-            url: secrets.getPineconeUrl() + urlEndPoint,
+            url: secrets.getPineconeSecrets().url + urlEndPoint,
             method: "POST",
             headers: {
-                'Api-Key': secrets.getPineconeApiKey(),
+                'Api-Key': secrets.getPineconeSecrets().apiKey,
                 'Content-Type': 'application/json'
             },
             json: true,   

@@ -1,5 +1,5 @@
 const { Client, GatewayIntentBits } = require('discord.js');
-const secrets = require('./secretManager')
+const secrets = require('../secretManager')
 let client;
 
 function onReady() {

@@ -1,4 +1,4 @@
-const discordBot = require("./scripts/discordBot.js");
+const discordBot = require("./scripts/discord/discordBot.js");
 const tests = require("./scripts/tests");
 
 tests.runTests();
