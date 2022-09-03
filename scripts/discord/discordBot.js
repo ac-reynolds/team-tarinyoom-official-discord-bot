@@ -1,6 +1,7 @@
 const { Client, GatewayIntentBits } = require('discord.js');
 const secretManager = require('../secretManager');
 const registerCommands = require('./registerCommands');
+const sleuther = require('./sleuther');
 let client;
 
 async function handleSearch(interaction) {
@@ -9,7 +10,15 @@ async function handleSearch(interaction) {
 }
 
 async function handleSleuth(interaction) {
-	await interaction.reply(`Sleuthing...`);
+	sleuthingInitiated = await sleuther.initiateSleuthing(client, interaction.guildId, () => {
+		console.log("done sleuthing");
+	});
+
+	if (sleuthingInitiated) {
+		await interaction.reply(`Sleuthing...`);
+	} else {
+		await interaction.reply(`I'm already sleuthing here, buddy!`);
+	}
 }
 
 function buildOnReady(secrets) {
@@ -32,12 +41,14 @@ function buildOnInteractionCreate() {
 				} catch (error) {
 					console.error(`Error when responding to sleuth command: ${error}`);
 				}
+				break;
 			case 'tsearch':
 				try {
 					await handleSearch(interaction);
 				} catch (error) {
 					console.error(`Error when responding to search command: ${error}`);
 				}
+				break;
 		}
 	};
 };
