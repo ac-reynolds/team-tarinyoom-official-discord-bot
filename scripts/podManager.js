@@ -5,32 +5,48 @@ const secrets = require('./secretManager')
 //id - discord messageId
 //values - cohere embed array data
 //namespace - discord guildId
-function updateVector(jsonObject){
-    return request({
-        url: "https://hackathon-s1-95bcf95.svc.us-west1-gcp.pinecone.io/vectors/update",
-        method: "POST",
-        headers: {
-            'Api-Key': secrets.getPineconeToken(),
-            'Content-Type': 'application/json'
-        },
-        json: true,   
-        body:  jsonObject
-    }, function (error, response, body){
-        console.log(response);
-    });
+function updateVector(messageId, values, namespace){
+    var jsonObject = {
+        "id" : messageId,
+        "values" : values,
+        "namespace" : namespace
+    }
+    return callAPI("vectors/update", jsonObjects);
 }
 
 
 function upsertVectors(jsonObjects){
+    return callAPI("vectors/upsert", jsonObjects);
+}
+
+function deleteVectors(ids, namespace){
+    var jsonObject = {
+        "id" : ids,
+        "deleteAll" : false,
+        "namespace" : namespace
+    }
+    return callAPI("vectors/delete", jsonObject);
+}
+
+function deleteAllVectors(namespace){
+    var jsonObject = {
+        "id" : [],
+        "deleteAll" : true,
+        "namespace" : namespace
+    }
+    return callAPI("vectors/delete", jsonObject);
+}
+
+function callAPI(urlPoint, jsonObject) {
     return request({
-        url: "https://hackathon-s1-95bcf95.svc.us-west1-gcp.pinecone.io/vectors/upsert",
+        url: "https://hackathon-s1-95bcf95.svc.us-west1-gcp.pinecone.io/"+urlPoint,
         method: "POST",
         headers: {
             'Api-Key': secrets.getPineconeToken(),
             'Content-Type': 'application/json'
         },
         json: true,   
-        body:  jsonObjects
+        body: jsonObject
     }, function (error, response, body){
         console.log(response);
     });
@@ -38,4 +54,4 @@ function upsertVectors(jsonObjects){
 
 
 
-module.exports = { updateVector, upsertVectors };
+module.exports = { updateVector, upsertVectors, deleteVectors, deleteAllVectors };
