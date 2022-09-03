@@ -44,14 +44,27 @@ async function runCohereTest(){
 }
 
 async function runPodTest(){
-//id - discord messageId
-//values - cohere embed array data
-//namespace - discord guildId
-
-
-	//update using cohere
-	const vals = await cohereClient.getEmbedding("this is a test");
-	//podManager.updateVector("message 1", vals, test_namespace);
+	const testVectors = await cohereClient.getEmbeddings(["the loch ness monster","eating grapes on friday", "having fun in the sun"]);
+	const searchVector = await cohereClient.getEmbedding("testing is fun!");
+	const obj = { 
+		"vectors": 
+		[{
+			"id": "testmessage1",
+			"values": testVectors[0]
+		},
+		{
+			"id": "testmessage2",
+			"values": testVectors[1]
+		},
+		{
+			"id": "testmessage3",
+			"values": testVectors[2]
+		}],
+		"namespace": test_namespace};	
+	let task = await podManager.upsertVectors(obj);
+	let task2 = await podManager.search(searchVector,test_namespace);
+	console.log(`Search results id-${task2[0].id} score-${task2[0].score}, id-${task2[1].id} score-${task2[1].score}, id-${task2[2].id} score-${task2[2].score}`);
+	let task3 = await podManager.deleteVectors(["testmessage1","testmessage2","testmessage3"],test_namespace);
 }
 
 async function runTests() {
