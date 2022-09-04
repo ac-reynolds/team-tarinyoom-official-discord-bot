@@ -2,6 +2,6 @@ const discordBot = require("./scripts/discord/discordBot.js");
 const tests = require("./scripts/tests");
 const testSleuth = require("./scripts/testSleuth");
 
-testSleuth.runSleuthTest();
+//testSleuth.runSleuthTest();
 
-//discordBot.runDiscordBot();
+discordBot.runDiscordBot();

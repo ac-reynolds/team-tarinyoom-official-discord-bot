@@ -1,53 +1,135 @@
+const { debug } = require('request');
 const cohere = require('../cohereClient');
 const pinecone = require('../podManager');
+const sleuthingStatus = new Map();
+
+let sleuthingFetchCallsInLastPeriod = 0;
+const runQ = [];
+
+// 5 calls every quarter second keeps us well below api abuse threshold (50 / second)
+const max_num_sleuthing_fetch_calls_per_period = 5;
+const period = 250;
 
 /*
-const sleuthingStatus = {
-	guilds: {
-		guildId: {
-			sleuthingActive: true,
-			channels: {
-				channelId: {
-					//sleuthingActive: true,
-					earliestMessage: id,
-					finished: false
-				}
+sleuthingStatus::
+{
+	MAP guildId: 
+		MAP channelId:
+			{
+				"earliestMessage": string,
+				"earliestMessageTime": int,
+				"finished": bool,
+				"numSleuthed": num
 			}
-
-		}
-}};
+}
 */
 
-
-async function sleuthChannel(client, guildId, channel) {
-	console.log(`Sleuthing ${channel.name}...`);
-	const channelMessages = await channel.messages.fetch({ 
-		limit: 10,
-		cache: false, 
-	});
-	let ctr = 0;
-	let msgArray = [];
-	for (m of channelMessages) {
-		console.log(`sleuthing ${ctr}`);
-		ctr++;
-		let embedding = await cohere.getEmbedding(m[1].content);
-		msgArray.push({
-			"id": m[0],
-			"embedding": embedding
-		});
+function dispatchQueue() {
+	console.log(`Dispatching run queue of length ${runQ.length}. Operating at ${sleuthingFetchCallsInLastPeriod / period} jobs per second.`);
+	while (sleuthingFetchCallsInLastPeriod < max_num_sleuthing_fetch_calls_per_period) {
+		if (runQ.length > 0) {
+			runQ.shift()();
+			sleuthingFetchCallsInLastPeriod++;
+			setTimeout(() => {
+				sleuthingFetchCallsInLastPeriod--;
+			}, period);
+		} else {
+			break;
+		}
 	}
-	//pinecone.recordMessages(guildId, channel.id, msgArray); //throwing exception
+}
+
+/**
+ * Enqueues fetch call in runqueue
+ * @param {*} channel 
+ * @param {*} params 
+ * @returns 
+ */
+function fetchSafely(channel, params, callback) {
+	runQ.push(async () => {
+		const messages = await channel.messages.fetch(params);
+		callback(messages);
+	})
+	dispatchQueue();
+}
+
+/**
+ * Updates Sleuthing status based on this passed array. Assumes 
+ * all messages are new. 
+ * @param {[Message]} messages An array of messages to be processed
+ */
+function updateStats(messages, channel) {
+	const channelStats = sleuthingStatus.get(channel.guildId).get(channel.id);
+	if (messages.length == 0) {
+		channelStats.finished = true;
+		console.log(`Finished sleuthing channel: ${channel.name}`);
+	}
+
+	for (m in messages) {
+		channelStats.numSleuthed++;
+		if (m.createdTimestamp < channelStats.earliestMessageTimestamp) {
+			channelStats.earliestMessageTimestamp = m.createdTimestamp;
+			channelStats.earliestMessage = m.id;
+		}
+	}
+}
+
+function continuousSleuth(channel) {
+	if (sleuthingStatus.get(channel.guildId).get(channel.id).finished) {
+		return;
+	}
+	console.log(`Fetching from ${channel.name}. Channel stats: ${JSON.stringify(sleuthingStatus.get(channel.guildId).get(channel.id))}`)
+	fetchSafely(channel, { 
+		/* Don't make this too big or our packet will be too large
+		 * Each message is encoded as 4096 4-byte floats, which is 16kB for
+		 * just the data. Experimentally, the failure threshold seems to be
+		 * between 60 and 70 messages per CRUD. 
+		 */
+		limit: 40,
+		before: sleuthingStatus.get(channel.guildId).get(channel.id).earliestMessage
+	}, 
+	async channelMessages => {
+		const messageArray = Array.from(channelMessages.values()).filter(m => m.content.length > 0);
+		const embeddings = await cohere.getEmbeddings(messageArray.map(m => m.content))
+			.catch(console.error);
+		const messageData = embeddings.map((val, i) => {
+			return {
+				"id": messageArray[i].id,
+				"embedding": val
+			};
+		});
+	
+		pinecone.recordMessages(channel.guildId, channel.id, messageData);
+
+		updateStats(messageArray, channel);
+		continuousSleuth(channel);
+	});
+};
+
+function initiateChannelSleuthing(channel) {
+	fetchSafely(channel, {
+		limit: 1
+	}, channelMessages => {
+		const messageArray = Array.from(channelMessages.values());
+		sleuthingStatus.get(channel.guildId).set(channel.id, {
+			"earliestMessage": messageArray[0].id,
+			"earliestMessageTimestamp": messageArray[0].createdTimestamp,
+			"finished": false,
+			"numSleuthed": 0
+		})
+		updateStats(messageArray, channel);
+		continuousSleuth(channel);
+	})
 }
 
 async function initiateSleuthing(client, guildId, callbackSuccess) {
-	//console.log(`Sleuthing ${client.guilds.cache.get(guildId).name}...`);
-
+	sleuthingStatus.set(guildId, new Map());
 	const channelManager = client.guilds.cache.get(guildId).channels;
-	const sleuthing = Array.from(channelManager.cache.values())
-						   .filter(channel => channel.type == 0)
-						   .map(async channel => await sleuthChannel(client, guildId, channel));
+	const targetChannels = Array.from(channelManager.cache.values())
+								.filter(channel => channel.type == 0);
 
-	// TODO: wait for sleuthing array to finish, then call callback
+
+	const initialize = await Promise.all(targetChannels.map(async channel => await initiateChannelSleuthing(channel)));
 	
 	return false;
 }

@@ -55,7 +55,7 @@ async function handleSleuth(interaction) {
 	if (sleuthingInitiated) {
 		await interaction.reply(`Server-wide sleuthing initiated...`);
 	} else {
-		await interaction.reply(`I'm already sleuthing here, buddy!`); // TODO: could provide some progress metrics perhaps
+		await interaction.reply({content: `I'm already sleuthing here, buddy!`, ephemeral: true}); // TODO: could provide some progress metrics perhaps
 	}
 }
 
@@ -115,6 +115,7 @@ function buildOnInteractionCreate() {
 function buildOnMessageCreate() {
 	return (msg) => {
 		sleuther.record(msg);
+		console.log(`Recording: "${msg.content}"`);
 	}
 }
 
