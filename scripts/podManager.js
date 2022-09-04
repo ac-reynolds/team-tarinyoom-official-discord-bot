@@ -1,6 +1,27 @@
 var request = require('request');
 const secrets = require('./secretManager')
 
+/**
+ * Formats messages and sends them to the pinecone backend
+ * @param {string} guildId 
+ * @param {string} channelId 
+ * @param {[{id: string, embedding: [float]}]} messages stores strings and embeddings
+ */
+async function recordMessages(guildId, channelId, messages) {
+    const cone = {
+        "vectors": messages.map(msg => {
+            return {
+                "id": msg.id,
+                "values": msg.embedding,
+                "metadata": {
+                    "channelId": channelId
+                }
+        }}),
+        "namespace": guildId
+    };
+
+    await upsertVectors(cone);
+};
 
 async function upsertVectors(jsonObjects){
     return await callAPI("/vectors/upsert", jsonObjects);
@@ -47,4 +68,4 @@ async function callAPI(urlEndPoint, jsonObject) {
     });
 }
 
-module.exports = { upsertVectors, deleteVectors, search };
+module.exports = { upsertVectors, deleteVectors, search, recordMessages };

@@ -8,7 +8,12 @@ const commands = [
 			option
 			.setName('target')
 			.setDescription('The target to search for!')
-			.setRequired(true)),
+			.setRequired(true))
+		.addIntegerOption(option =>
+			option
+			.setName('n')
+			.setDescription('The number of results to return.')
+			.setRequired(false)),
 	new SlashCommandBuilder().setName('tsleuthnt').setDescription('Pauses sleuthing progress.'),
 	new SlashCommandBuilder().setName('tstats').setDescription('Get sleuthing stats.')
 ].map(command => command.toJSON());

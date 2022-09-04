@@ -3,30 +3,45 @@ const secretManager = require('../secretManager');
 const registerCommands = require('./registerCommands');
 const sleuther = require('./sleuther');
 const searcher = require('./searcher');
+
+const default_n = 3;
 let client;
 
 async function handleSearch(interaction) {
 
 	// Retrieve message IDs with search
 	const target = interaction.options.getString('target');
-	const results = await searcher.search(target, interaction.guildId, 1);
+	let n = interaction.options.getInteger('n');
+	if (n == null) {
+		n = default_n;
+	}
+	
+	const results = await searcher.search(target, interaction.guildId, n);
 
 	// Get the actual messages
 	const channels = client.guilds.cache.get(interaction.guildId).channels.cache;
 	const messages = await Promise.all(results.map(
 		async result => await channels.get(result.channelId).messages.fetch(result.messageId)));
 
+	const zipped = messages.map((val, i) => {
+		return {
+			...val,
+			score: results[i].score
+		};
+	})
+
 	// Format messages for output to screen
 	function formatMessage(m) {
 		let output = "";
 		output += `> ${m.content}\n`
 		output += `from \`${m.author.username}#${m.author.discriminator}\` on ${time(Math.round(m.createdTimestamp / 1000), "F")}\n`;
+		output += `with similarity score ${m.score}\n`;
 		output += `<${messageLink(m.channelId, m.id, m.guildId)}>`
 		return output;
 	}
 
-	const outputData = messages
-		.map(message => formatMessage(message))
+	const outputData = zipped
+		.map(z => formatMessage(z))
 		.join("\n\n");
 
 	await interaction.reply({ content: `Search results for "${target}":\n\n${outputData}`, ephemeral: true });
@@ -97,13 +112,25 @@ function buildOnInteractionCreate() {
 	};
 };
 
+function buildOnMessageCreate() {
+	return (msg) => {
+		sleuther.record(msg);
+	}
+}
+
 function runDiscordBot(){
-	// Create a new client instance
-	client = new Client({ intents: [GatewayIntentBits.Guilds] });
+
+	client = new Client({ intents: [
+		GatewayIntentBits.Guilds,
+		GatewayIntentBits.GuildMessages,
+		GatewayIntentBits.MessageContent
+	]});
+
 	const secrets = secretManager.getDiscordSecrets();
 
 	client.once('ready', buildOnReady(secrets));
 	client.on('interactionCreate', buildOnInteractionCreate());
+	client.on('messageCreate', buildOnMessageCreate());
 
 	client.login(secrets.botToken);
 };
