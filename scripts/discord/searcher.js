@@ -2,6 +2,7 @@ const cohere = require('../cohereClient');
 const pinecone = require('../podManager');
 
 async function search(query, guildId, numResults) {
+	console.log(`Searching for: "${query}"`);
 	const embedding = await cohere.getEmbedding(query);
 	const results = await pinecone.search(embedding, guildId, numResults);
 	return results.map(val => {

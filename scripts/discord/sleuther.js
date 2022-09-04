@@ -92,14 +92,17 @@ function continuousSleuth(channel) {
 		const messageArray = Array.from(channelMessages.values()).filter(m => m.content.length > 0);
 		const embeddings = await cohere.getEmbeddings(messageArray.map(m => m.content))
 			.catch(console.error);
-		const messageData = embeddings.map((val, i) => {
-			return {
-				"id": messageArray[i].id,
-				"embedding": val
-			};
-		});
-	
-		pinecone.recordMessages(channel.guildId, channel.id, messageData);
+		
+		if (embeddings != undefined) {
+			const messageData = embeddings.map((val, i) => {
+				return {
+					"id": messageArray[i].id,
+					"embedding": val
+				};
+			});
+		
+			pinecone.recordMessages(channel.guildId, channel.id, messageData);	
+		}
 
 		updateStats(messageArray, channel);
 		continuousSleuth(channel);
@@ -109,8 +112,20 @@ function continuousSleuth(channel) {
 function initiateChannelSleuthing(channel) {
 	fetchSafely(channel, {
 		limit: 1
-	}, channelMessages => {
+	}, async channelMessages => {
 		const messageArray = Array.from(channelMessages.values());
+		const embedding = await cohere.getEmbedding(messageArray[0].content)
+			.catch(console.error);
+		
+		if (embedding != undefined) {
+
+			const messageData = [{
+				"id": messageArray[0].id,
+				"embedding": embedding
+			}];
+		
+			pinecone.recordMessages(channel.guildId, channel.id, messageData);	
+		}
 		sleuthingStatus.get(channel.guildId).set(channel.id, {
 			"earliestMessage": messageArray[0].id,
 			"earliestMessageTimestamp": messageArray[0].createdTimestamp,
@@ -131,7 +146,7 @@ async function initiateSleuthing(client, guildId, callbackSuccess) {
 
 	const initialize = await Promise.all(targetChannels.map(async channel => await initiateChannelSleuthing(channel)));
 	
-	return false;
+	return true;
 }
 
 /**
