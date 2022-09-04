@@ -53,39 +53,46 @@ function fetchSafely(channel, params, callback) {
 	dispatchQueue();
 }
 
+function getStats(channel) {
+	return `Stats for "${channel.name}": ${JSON.stringify(sleuthingStatus.get(channel.guildId).get(channel.id))}`;
+}
+
 /**
  * Updates Sleuthing status based on this passed array. Assumes 
  * all messages are new. 
  * @param {[Message]} messages An array of messages to be processed
  */
 function updateStats(messages, channel) {
+	console.log(`before channel update: ${getStats(channel)}`)
 	const channelStats = sleuthingStatus.get(channel.guildId).get(channel.id);
 	if (messages.length == 0) {
 		channelStats.finished = true;
 		console.log(`Finished sleuthing channel: ${channel.name}`);
 	}
 
-	for (m in messages) {
+	for (i = 0; i < messages.length; i++) {
 		channelStats.numSleuthed++;
-		if (m.createdTimestamp < channelStats.earliestMessageTimestamp) {
-			channelStats.earliestMessageTimestamp = m.createdTimestamp;
-			channelStats.earliestMessage = m.id;
+		if (messages[i].createdTimestamp < channelStats.earliestMessageTimestamp) {
+			channelStats.earliestMessageTimestamp = messages[i].createdTimestamp;
+			channelStats.earliestMessage = messages[i].id;
 		}
 	}
+	console.log(`after channel update: ${getStats(channel)}`);
 }
 
 function continuousSleuth(channel) {
+	console.log(`Beginning sleuthing for: "${channel.name}"`);
 	if (sleuthingStatus.get(channel.guildId).get(channel.id).finished) {
+		console.log(`"${channel.name}" is fully sleuthed!`);
 		return;
 	}
-	console.log(`Fetching from ${channel.name}. Channel stats: ${JSON.stringify(sleuthingStatus.get(channel.guildId).get(channel.id))}`)
 	fetchSafely(channel, { 
 		/* Don't make this too big or our packet will be too large
 		 * Each message is encoded as 4096 4-byte floats, which is 16kB for
 		 * just the data. Experimentally, the failure threshold seems to be
 		 * between 60 and 70 messages per CRUD. 
 		 */
-		limit: 40,
+		limit: 50,
 		before: sleuthingStatus.get(channel.guildId).get(channel.id).earliestMessage
 	}, 
 	async channelMessages => {
