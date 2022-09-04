@@ -43,4 +43,20 @@ async function initiateSleuthing(client, guildId, callbackSuccess) {
 	return false;
 }
 
-module.exports = { initiateSleuthing };
+/**
+ * 
+ * @param {string} msg 
+ */
+async function record(msg) {
+
+	const embedding = await cohere.getEmbedding(msg.content); 
+
+	pinecone.recordMessages(msg.guildId,
+							msg.channelId,
+							[{
+								"id": msg.id,
+								"embedding": embedding 
+							}]);
+}
+
+module.exports = { initiateSleuthing, record };

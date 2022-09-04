@@ -3,17 +3,15 @@ const pinecone = require('../podManager');
 
 async function search(query, guildId, numResults) {
 	const embedding = await cohere.getEmbedding(query);
-	//const results = await pinecone.search(embedding, guildId, numResults);
-	return [ // hardcoded values for now
-		{
-			"channelId": "861796985362055173",
-			"messageId": "864998871976509461"
-		},
-		{
-			"channelId": "891085535270027315",
-			"messageId": "891850982407938088"
-		}
-	];
+	const results = await pinecone.search(embedding, guildId, numResults);
+	return results.map(val => {
+		console.log(`"${val.score}"`)
+		return {
+			"score": val.score,
+			"messageId": val.id,
+			"channelId": val.metadata.channelId
+		};
+	});
 }
 
 module.exports = { search }
