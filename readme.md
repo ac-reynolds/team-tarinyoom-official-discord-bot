@@ -1,4 +1,4 @@
-# Team Tarinyoom Official Discord bot for Cohere AI hackathon: 
+# Team Tarinyoom Official Discord bot for Cohere AI hackathon. We won third place!
 
 Presentation link: https://pro.panopto.com/Panopto/Pages/Viewer.aspx?tid=f8544ad3-4bcf-42cf-9eeb-af0601786967
 
