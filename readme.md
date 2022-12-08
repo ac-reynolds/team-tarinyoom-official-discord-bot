@@ -8,4 +8,4 @@ This feature ameliorates Discord's poor search index functionality by allowing u
 
 However, it is not very scalable as a separate discord bot due to size constraints (learning every message from every server), and would be better suited as a native Discord feature instead.
 
-[Adam Chiu Reynolds.pdf](https://github.com/tarinyoom/team-tarinyoom-official-discord-bot/files/10189014/Adam.Chiu.Reynolds.pdf)
+[We tied for 3rd place!](https://github.com/tarinyoom/team-tarinyoom-official-discord-bot/files/10189014/Adam.Chiu.Reynolds.pdf)
