@@ -1,6 +1,4 @@
-# Team Tarinyoom Official Discord bot for Cohere AI hackathon. We won third place!
-
-Presentation link: https://pro.panopto.com/Panopto/Pages/Viewer.aspx?tid=f8544ad3-4bcf-42cf-9eeb-af0601786967
+# Team Tarinyoom Official Discord bot for Cohere AI hackathon.
 
 Discord bot to provide enhanced search functionality based on semantic similarity
 
@@ -9,3 +7,5 @@ We use discord.js API to scrape messages from a discord server. We then use Cohe
 This feature ameliorates Discord's poor search index functionality by allowing users to search past messages without finding an exact match.
 
 However, it is not very scalable as a separate discord bot due to size constraints (learning every message from every server), and would be better suited as a native Discord feature instead.
+
+[Adam Chiu Reynolds.pdf](https://github.com/tarinyoom/team-tarinyoom-official-discord-bot/files/10189014/Adam.Chiu.Reynolds.pdf)
